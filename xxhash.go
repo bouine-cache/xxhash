@@ -1,5 +1,10 @@
 // Package xxhash implements the 64-bit variant of xxHash (XXH64) as described
-// at https://xxhash.com/.
+// at https://xxhash.com/, and the 128-bit variant of XXH3 (XXH128).
+//
+// XXH64 is the original 64-bit xxHash algorithm. XXH3-128 is a different
+// algorithm that produces a 128-bit result. Both are non-cryptographic hash
+// functions and must not be used for password hashing, signatures,
+// authentication, or any adversarial security boundary.
 package xxhash
 
 import (

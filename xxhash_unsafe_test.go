@@ -30,8 +30,9 @@ func TestStringAllocs(t *testing.T) {
 // It asserts that certain important functions may be inlined.
 func TestInlining(t *testing.T) {
 	funcs := map[string]struct{}{
-		"Sum64String":           {},
-		"(*Digest).WriteString": {},
+		"Sum64String":              {},
+		"(*Digest).WriteString":    {},
+		"(*Digest128).WriteString": {},
 	}
 
 	cmd := exec.Command("go", "test", "-gcflags=-m", "-run", "xxxx")
