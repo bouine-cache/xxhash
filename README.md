@@ -1,7 +1,7 @@
 # xxhash
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/cespare/xxhash/v2.svg)](https://pkg.go.dev/github.com/cespare/xxhash/v2)
-[![Test](https://github.com/cespare/xxhash/actions/workflows/test.yml/badge.svg)](https://github.com/cespare/xxhash/actions/workflows/test.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bouine-cache/xxhash/v3.svg)](https://pkg.go.dev/github.com/bouine-cache/xxhash/v3)
+[![Test](https://github.com/bouine-cache/xxhash/actions/workflows/test.yml/badge.svg)](https://github.com/bouine-cache/xxhash/actions/workflows/test.yml)
 
 xxhash is a Go implementation of the 64-bit [xxHash] algorithm, XXH64, and the
 128-bit XXH3 algorithm (also called XXH128). These are high-quality hashing
@@ -140,12 +140,10 @@ security boundary. It is designed for speed and quality, not security.
 
 ## Compatibility
 
-This package is in a module and the latest code is in version 2 of the module.
+This package is in a module and the latest code is in version 3 of the module.
 You need a version of Go with at least "minimal module compatibility" to use
-github.com/cespare/xxhash/v2:
+github.com/bouine-cache/xxhash/v3:
 
-* 1.9.7+ for Go 1.9
-* 1.10.3+ for Go 1.10
 * Go 1.11 or later
 
 I recommend using the latest release of Go.
