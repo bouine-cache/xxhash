@@ -330,13 +330,51 @@ func xxh3Len129to240_128b(input, secret []byte, seed uint64) Uint128 {
 // --- Long input branch (>240 bytes) ---
 
 // xxh3Accumulate512 processes a single 64-byte stripe.
+//
+// The loop is fully unrolled with constant indices so that the compiler can
+// keep the accumulators in registers (the official C implementation unrolls
+// this loop for scalar targets the same way). With a variable loop index,
+// every lane forces the accumulator array to be reloaded and spilled.
 func xxh3Accumulate512(acc *[8]uint64, input, secret []byte) {
-	for lane := 0; lane < xxh3AccNb; lane++ {
-		dataVal := le64(input[lane*8 : lane*8+8])
-		dataKey := dataVal ^ le64(secret[lane*8:lane*8+8])
-		acc[lane^1] += dataVal // swap adjacent lanes
-		acc[lane] = mult32to64add64(dataKey, dataKey>>32, acc[lane])
-	}
+	data0 := le64(input[0:8])
+	key0 := data0 ^ le64(secret[0:8])
+	acc[1] += data0
+	acc[0] = mult32to64add64(key0, key0>>32, acc[0])
+
+	data1 := le64(input[8:16])
+	key1 := data1 ^ le64(secret[8:16])
+	acc[0] += data1
+	acc[1] = mult32to64add64(key1, key1>>32, acc[1])
+
+	data2 := le64(input[16:24])
+	key2 := data2 ^ le64(secret[16:24])
+	acc[3] += data2
+	acc[2] = mult32to64add64(key2, key2>>32, acc[2])
+
+	data3 := le64(input[24:32])
+	key3 := data3 ^ le64(secret[24:32])
+	acc[2] += data3
+	acc[3] = mult32to64add64(key3, key3>>32, acc[3])
+
+	data4 := le64(input[32:40])
+	key4 := data4 ^ le64(secret[32:40])
+	acc[5] += data4
+	acc[4] = mult32to64add64(key4, key4>>32, acc[4])
+
+	data5 := le64(input[40:48])
+	key5 := data5 ^ le64(secret[40:48])
+	acc[4] += data5
+	acc[5] = mult32to64add64(key5, key5>>32, acc[5])
+
+	data6 := le64(input[48:56])
+	key6 := data6 ^ le64(secret[48:56])
+	acc[7] += data6
+	acc[6] = mult32to64add64(key6, key6>>32, acc[6])
+
+	data7 := le64(input[56:64])
+	key7 := data7 ^ le64(secret[56:64])
+	acc[6] += data7
+	acc[7] = mult32to64add64(key7, key7>>32, acc[7])
 }
 
 // xxh3Accumulate processes nbStripes stripes.
@@ -347,16 +385,27 @@ func xxh3Accumulate(acc *[8]uint64, input, secret []byte, nbStripes int) {
 }
 
 // xxh3ScrambleAcc scrambles the accumulators.
+//
+// Unrolled with constant indices for the same reason as
+// xxh3Accumulate512.
 func xxh3ScrambleAcc(acc *[8]uint64, secret []byte) {
-	for lane := 0; lane < xxh3AccNb; lane++ {
-		key64 := le64(secret[lane*8 : lane*8+8])
-		acc64 := acc[lane]
-		acc64 = xorshift64(acc64, 47)
-		acc64 ^= key64
-		acc64 *= uint64(xxhPrime32_1)
-		acc[lane] = acc64
-	}
+	acc[0] = xxh3ScrambleLane(acc[0], le64(secret[0:8]))
+	acc[1] = xxh3ScrambleLane(acc[1], le64(secret[8:16]))
+	acc[2] = xxh3ScrambleLane(acc[2], le64(secret[16:24]))
+	acc[3] = xxh3ScrambleLane(acc[3], le64(secret[24:32]))
+	acc[4] = xxh3ScrambleLane(acc[4], le64(secret[32:40]))
+	acc[5] = xxh3ScrambleLane(acc[5], le64(secret[40:48]))
+	acc[6] = xxh3ScrambleLane(acc[6], le64(secret[48:56]))
+	acc[7] = xxh3ScrambleLane(acc[7], le64(secret[56:64]))
 }
+
+// xxh3ScrambleLane scrambles a single accumulator lane.
+func xxh3ScrambleLane(acc64, key64 uint64) uint64 {
+	acc64 = xorshift64(acc64, 47)
+	acc64 ^= key64
+	return acc64 * uint64(xxhPrime32_1)
+}
+
 
 // xxh3InitCustomSecret generates a custom secret from a seed.
 func xxh3InitCustomSecret(customSecret *[xxh3SecretDefaultSize]byte, seed uint64) {
