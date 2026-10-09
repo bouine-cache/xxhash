@@ -181,7 +181,7 @@ func TestSum128PipelineDifferential(t *testing.T) {
 		func(i int) byte { return byte(i) },
 		func(i int) byte { return 0 },
 		func(i int) byte { return 0xff },
-		func(i int) byte { return byte(i*2654435761>>16) & 0xff },
+		func(i int) byte { return byte(uint32(i) * 2654435761 >> 16) },
 	}
 
 	for _, pattern := range patterns {
@@ -217,7 +217,7 @@ func TestDigest128VsReferencePipeline(t *testing.T) {
 	for _, n := range lengths {
 		data := make([]byte, n)
 		for i := range data {
-			data[i] = byte(i*2654435761>>16) & 0xff
+			data[i] = byte(uint32(i) * 2654435761 >> 16)
 		}
 		want := refSum128WithSeed(data, 0)
 		want1 := refSum128WithSeed(data, 1)
